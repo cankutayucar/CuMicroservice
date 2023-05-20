@@ -6,3 +6,4 @@ Services
 	-OrderApi => 5015
 	-PaymentApi => 5016
 identityServer => 5001
+GateWay => 5000
