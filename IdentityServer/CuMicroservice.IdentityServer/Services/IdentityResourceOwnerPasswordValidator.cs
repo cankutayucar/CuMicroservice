@@ -27,7 +27,7 @@ namespace CuMicroservice.IdentityServer.Services
                 return;
             }
             var passwordCheck = await _userManager.CheckPasswordAsync(user, context.Password);
-            if (passwordCheck)
+            if (!passwordCheck)
             {
                 var errors = new Dictionary<string, object>();
                 errors.Add("errores", new List<string> { "Email veya şifreniz yanlış" });

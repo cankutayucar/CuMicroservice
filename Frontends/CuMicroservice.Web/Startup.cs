@@ -1,4 +1,7 @@
 using CuMicroservice.Web.Models;
+using CuMicroservice.Web.Services;
+using CuMicroservice.Web.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,8 +26,18 @@ namespace CuMicroservice.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient<IIdentityService, IdentityService>();
+            services.AddHttpContextAccessor();
             services.Configure<ServiceApiSettings>(Configuration.GetSection("ServiceApiSettings"));
             services.Configure<ClientSettings>(Configuration.GetSection("ClientSettings"));
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            {
+                options.LoginPath = "/Auth/SignIn";
+                options.ExpireTimeSpan = TimeSpan.FromDays(60);
+                options.SlidingExpiration = true;
+                options.Cookie.Name = "CuMicroservice";
+            });
             services.AddControllersWithViews();
         }
 
@@ -43,6 +56,7 @@ namespace CuMicroservice.Web
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
