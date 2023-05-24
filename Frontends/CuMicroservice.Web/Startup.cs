@@ -1,3 +1,4 @@
+using CuMicroservice.Web.Handlers;
 using CuMicroservice.Web.Models;
 using CuMicroservice.Web.Services;
 using CuMicroservice.Web.Services.Interfaces;
@@ -26,10 +27,15 @@ namespace CuMicroservice.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpClient<IIdentityService, IdentityService>();
             services.AddHttpContextAccessor();
             services.Configure<ServiceApiSettings>(Configuration.GetSection("ServiceApiSettings"));
             services.Configure<ClientSettings>(Configuration.GetSection("ClientSettings"));
+            var serviceApiSettings = Configuration.GetSection("ServiceApiSettings").Get<ServiceApiSettings>();
+            services.AddHttpClient<IIdentityService, IdentityService>();
+            services.AddHttpClient<IUserService, UserService>(opt =>
+            {
+                opt.BaseAddress = new Uri(serviceApiSettings.IdentityBaseUri);
+            }).AddHttpMessageHandler<ResourceOwnerPasswordTokenHandler>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
